@@ -33,6 +33,8 @@ def calculate_bursts(coherenceArray, burst_window = 60, percent_max = 0.5)
     total_auc = 0.0
     in_burst = False
     current_burst_auc = 0.0
+    burst_times = []  # To store the start and stop times of each burst
+    current_burst_start = None  # To track the start time of the current burst
 
     # Loop through the array to identify bursts
     for i in range(burst_window, len(coherenceArray)):
@@ -40,6 +42,7 @@ def calculate_bursts(coherenceArray, burst_window = 60, percent_max = 0.5)
             # A new burst starts
             in_burst = True
             burst_count += 1
+            current_burst_start = i  # Record the start time
             current_burst_auc = data[i]  # Start the AUC with the first value of the burst
         elif in_burst:
             if continuation_condition[i]:
@@ -48,12 +51,15 @@ def calculate_bursts(coherenceArray, burst_window = 60, percent_max = 0.5)
             else:
                 # End of burst, add the current burst's AUC to total AUC
                 total_auc += current_burst_auc
+                burst_times.append((current_burst_start, i - 1))  # Record start and stop times
                 in_burst = False
     # If a burst is ongoing at the end of the loop, add its AUC
     if in_burst:
         total_auc += current_burst_auc
+        burst_times.append((current_burst_start, len(data) - 1))
 
-    return burst_count, total_auc
+    return burst_count, total_auc, burst_times
+
 
 
 
